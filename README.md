@@ -1,4 +1,4 @@
-# Zodiak-Chat
+# Zodiak Chat App
 Zodiak / Horoscope Chat Lite Version
 
 <p align="center">
