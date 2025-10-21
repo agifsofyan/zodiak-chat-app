@@ -4,8 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { WsAdapter } from '@nestjs/platform-ws';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
-import { PORT } from '../config/configuration';
-import * as fs from 'fs';
+import { ConfigService } from '@nestjs/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {cors: true});
@@ -29,8 +28,10 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, options);    
   SwaggerModule.setup('api/v1/docs', app, document);
 
-  await app.listen(PORT);
+  const config = app.get(ConfigService)
+  const port = config.get<string>('API_PORT')
+  await app.listen(port);
 
-  console.log(`\n[API] zodiac-chat-api started running in ${process.env.NODE_ENV} mode on port ${PORT}\n`);
+  console.log(`\n[API] zodiac-chat-api started running in ${process.env.NODE_ENV} mode on port ${port}\n`);
 }
 bootstrap();

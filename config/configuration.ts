@@ -1,31 +1,21 @@
-import { MongooseModule } from '@nestjs/mongoose';
-import 'dotenv/config';
+import { ConfigModule } from '@nestjs/config';
+import * as Joi from 'joi';
 
-const {
-	// MONGO_DB_URI,
-	API_PORT,
-	DB_USER,
-	DB_PASS,
-	DB_HOST,
-	DB_PORT,
-	DB_NAME, 
-	DB_AUTH,
-	JWT_SECRET,
-	JWT_EXPIRATION,
-	JWT_ENCRYPT_SECRETKEY
-} = process.env;
+export const CONFIG_ENV = ConfigModule.forRoot({
+	isGlobal: true, // agar bisa diakses di semua tempat
+	envFilePath: '.env', // default juga .env
+	validationSchema: Joi.object({
+		API_PORT: Joi.number().default(3000),
 
-const URI = `mongodb://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?authSource=${DB_AUTH}`;
+		DB_USER: Joi.string().allow('').optional(),
+		DB_PASS: Joi.string().allow('').optional(),
+		DB_HOST: Joi.string().required(),
+		DB_PORT: Joi.number().default(27017),
+		DB_NAME: Joi.string().required(),
+		DB_AUTH: Joi.string().allow('').optional(),
 
-export const MONGO_DB_CONNECTION = MongooseModule.forRoot(URI, {
-	useNewUrlParser: true,
-	useCreateIndex: true,
-	useUnifiedTopology: true,
-	useFindAndModify: false
-});
-
-export const PORT = `${API_PORT}`;
-export const MONGO_URI = `${URI}`;
-export const JWT_SECRET_KEY = `${JWT_SECRET}`;
-export const JWT_ENCRYPT_SECRET_KEY = `${JWT_ENCRYPT_SECRETKEY}`;
-export const JWT_EXPIRATION_TIME = `${JWT_EXPIRATION}`;
+		JWT_SECRET_KEY: Joi.string().required(),
+		JWT_EXPIRATION: Joi.string().default('1d'),
+		JWT_ENCRYPT_SECRET_KEY: Joi.string().required(),
+	}),
+})
