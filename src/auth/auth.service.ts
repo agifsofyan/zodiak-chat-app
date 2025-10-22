@@ -49,32 +49,29 @@ export class AuthService {
         return result;
     }
 
-    private jwtExtractor(req: Request) {
+    private jwtExtractor = (req: Request) => {
         let token = null;
 
         if (req.header('x-auth-token')) {
             token = req.header('x-auth-token');
-        } else if (req.headers.authorization) {
+        } else if(req.headers.authorization) {
             if(req.headers.authorization.search('Bearer') === -1){
                 throw new BadRequestException('Invalid Header Authorization Format.');
             }
 
             token = req.headers.authorization.replace('Bearer ', '').replace(' ', '');
-        } else if (req.body.token) {
-            token = req.body.token.replace(' ', '');
         }
 
-        if (req.query.token) {
-            token = req.body.token.replace(' ', '');
+        if (!token) {
+            throw new UnauthorizedException('Unauthorized')
         }
 
-        if (token) {
-            try {
-                token = this.decryptData(token);
-            } catch (err) {
-                throw new BadRequestException('Invalid token authentication.');
-            }
+        try {
+            token = this.decryptData(token);
+        } catch (err) {
+            throw new BadRequestException('Invalid token authentication.');
         }
+        
         return token;
     }
 
@@ -86,7 +83,5 @@ export class AuthService {
         return this.cryptr.decrypt(data);
     }
 
-    returnJwtExtractor() {
-        return this.jwtExtractor;
-    }
+    returnJwtExtractor = () => this.jwtExtractor
 }

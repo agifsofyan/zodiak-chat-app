@@ -17,5 +17,12 @@ export const CONFIG_ENV = ConfigModule.forRoot({
 		JWT_SECRET_KEY: Joi.string().required(),
 		JWT_EXPIRATION: Joi.string().default('1d'),
 		JWT_ENCRYPT_SECRET_KEY: Joi.string().required(),
+
+		MINIO_ENDPOINT: Joi.string().allow('').optional(),
+		MINIO_PORT: Joi.number().allow('').optional(),
+      	MINIO_USE_SSL: Joi.boolean().default(true),
+      	MINIO_ACCESS_KEY: Joi.string().allow('').optional(),
+		MINIO_SECRET_KEY: Joi.string().allow('').optional(),
+		MINIO_REGION: Joi.string().default('ap-southeast-1'),
 	}),
 })

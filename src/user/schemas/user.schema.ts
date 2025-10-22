@@ -6,13 +6,18 @@ export const UserSchema = new mongoose.Schema({
     email: { type: String, required: true },
     password: {
         type: String,
-        minlength: 6,
+        minlength: 8,
         required: true
     },
     avatar: { type: String },
+    birthday: { type: Date },
+    horoscope: { type: String },
+    zodiac: { type: String },
+    height: { type: Number },
+    weight: { type: Number },
     last_login: { type: Date },
     created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: null }
+    updated_at: { type: Date, default: Date.now }
 },{ 
 	collection: 'users',
 	versionKey: false

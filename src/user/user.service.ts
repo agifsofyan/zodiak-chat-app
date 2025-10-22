@@ -14,8 +14,6 @@ import { IUser } from './interfaces/user/user.interface';
 import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 
-const ObjectId = mongoose.Types.ObjectId;
-
 @Injectable()
 export class UserService {
     constructor(
@@ -81,15 +79,14 @@ export class UserService {
         }
     }
 
-    async whoAmI(user: any) {
-        console.log(user)
-        const query = await this.userModel.findOne({_id: user._id});
+    async whoAmI(userId: any) {
+        const query = await this.userModel.findOne({_id: userId});
 
-        var users = query.toObject()
-        delete users.password
-        delete users.created_at
-        delete users.updated_at
-        delete users.__v
+        var user = query.toObject()
+        delete user.password
+        delete user.created_at
+        delete user.updated_at
+        delete user.__v
         
         return user
     }
@@ -111,5 +108,33 @@ export class UserService {
         delete user.updated_at
 
         return user
+    }
+
+    async addOrChangeAbout(userId: mongoose.Types.ObjectId, input?: any): Promise<IUser> {
+        try {
+            await this.userModel.findByIdAndUpdate(userId, input);
+            
+            let profile = await this.userModel.findById(userId);
+            
+            var about = profile.toObject()
+            delete about.name
+            delete about.email
+            delete about.password
+            delete about.last_login
+            delete about.created_at
+            delete about.updated_at
+            
+            return about
+		} catch (error) {
+			throw new Error(error)	
+		}
+    }
+    
+    async updateAvatar(userId: string, avatarUrl: string) {
+        return await this.userModel.findByIdAndUpdate(
+            userId,
+            { avatar: avatarUrl },
+            { new: true },
+        );
     }
 }

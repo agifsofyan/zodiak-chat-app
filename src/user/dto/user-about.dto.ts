@@ -1,0 +1,56 @@
+import {
+    IsISO8601,
+} from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
+
+export class SyncAboutDTO {
+    // Photo Profile
+    @ApiProperty({
+        example: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/users/profiles/user-icon.png',
+        description: 'Photo Profile',
+        format: 'string'
+    })
+    avatar: string;
+
+    // Birthday
+    @ApiProperty({
+        example: '1995-01-15T00:00:00.000Z',
+        description: 'Birthday in ISO 8601 format',
+        format: 'date'
+    })
+    @IsISO8601({ strict: false, strictSeparator: true })
+    // @Type(() => Date)
+    birthday: Date;
+
+    // Horoscope
+    @ApiProperty({
+        example: 'aries',
+        description: 'Horoscope',
+        format: 'string',
+    })
+    horoscope: string;
+
+    // Zodiac
+    @ApiProperty({
+        example: 'pig',
+        description: 'Zodiac',
+        format: 'string',
+    })
+    zodiac: string;
+
+    // Height
+    @ApiProperty({
+        example: 175,
+        description: 'Height (cm)',
+        format: 'number',
+    })
+    height: number;
+
+    // Weight
+    @ApiProperty({
+        example: 69,
+        description: 'Weight (kg)',
+        format: 'number',
+    })
+    weight: number;
+}
