@@ -2,8 +2,8 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 
 export const CONFIG_ENV = ConfigModule.forRoot({
-	isGlobal: true, // agar bisa diakses di semua tempat
-	envFilePath: '.env', // default juga .env
+	isGlobal: true,
+	envFilePath: '.env',
 	validationSchema: Joi.object({
 		API_PORT: Joi.number().default(3000),
 

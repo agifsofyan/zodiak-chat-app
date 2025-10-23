@@ -13,7 +13,7 @@ import { ChatModule } from './chat/chat.module';
   imports: [
     /**
      * 🔹 CONFIG MODULE
-     * Memuat semua variabel dari .env dan memvalidasinya
+     * Load all variables from .env and validate them
      */
     // Start Config
     CONFIG_ENV,
