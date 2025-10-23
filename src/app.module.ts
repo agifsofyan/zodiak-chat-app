@@ -5,8 +5,8 @@ import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { CONFIG_DB_CONNECTION } from 'config/db.config';
 import { CONFIG_ENV } from 'config/configuration';
-import { MinioService } from './minio/minio.service';
 import { MinioModule } from './minio/minio.module';
+import { ProfileModule } from './profile/profile.module';
 
 @Module({
   imports: [
@@ -21,7 +21,8 @@ import { MinioModule } from './minio/minio.module';
 
     AuthModule,
     UserModule,
-    MinioModule
+    MinioModule,
+    ProfileModule
   ],
   controllers: [AppController],
   providers: [AppService],

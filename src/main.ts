@@ -10,10 +10,9 @@ async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {cors: true});
 
   app.enableCors();
-
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.setGlobalPrefix('api/v1');
-  app.useWebSocketAdapter(new WsAdapter(app) as any);
+  // app.useWebSocketAdapter(new WsAdapter(app) as any);
 
   // Swagger API Documentation
   const options = new DocumentBuilder()
@@ -26,7 +25,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);    
-  SwaggerModule.setup('api/v1/docs', app, document);
+  SwaggerModule.setup('api/docs/v1', app, document);
 
   const config = app.get(ConfigService)
   const port = config.get<string>('API_PORT')

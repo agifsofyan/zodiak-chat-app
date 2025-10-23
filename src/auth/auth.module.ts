@@ -7,7 +7,6 @@ import { UserSchema } from 'src/user/schemas/user.schema';
 import { SessionSerializer } from './session.serializer';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import * as jwt from 'jsonwebtoken';
 
 @Module({
   imports: [

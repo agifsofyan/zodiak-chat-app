@@ -1,36 +1,62 @@
-import * as mongoose from 'mongoose';
 import * as bcrypt from 'bcrypt';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, HydratedDocument, Types } from 'mongoose';
+import { Profile } from 'src/profile/schemas/profile.schema';
+import { Interest } from 'src/profile/schemas/interest.schema';
 
-export const UserSchema = new mongoose.Schema({
-    name: { type: String },
-    email: { type: String, required: true },
-    password: {
-        type: String,
-        minlength: 8,
-        required: true
-    },
-    avatar: { type: String },
-    birthday: { type: Date },
-    horoscope: { type: String },
-    zodiac: { type: String },
-    height: { type: Number },
-    weight: { type: Number },
-    last_login: { type: Date },
-    created_at: { type: Date, default: Date.now },
-    updated_at: { type: Date, default: Date.now }
-},{ 
-	collection: 'users',
-	versionKey: false
-});
+@Schema({ timestamps: true, versionKey: false })
+export class User extends Document {
+    @Prop({ required: true })
+    name: string;
 
-UserSchema.pre('save', async function () {
+    @Prop({
+        required: true,
+        unique: true,
+        lowercase: true,
+        trim: true,
+        match: [/^\S+@\S+\.\S+$/, 'Email not valid'],
+    })
+    email: string;
+
+    @Prop({ required: true, minLength: 8 })
+    password: string;
+    
+    last_login: Date;
+
+    @Prop({ type: Types.ObjectId, ref: 'Profile', default: null })
+    profile: Profile | Types.ObjectId;
+
+     @Prop({ type: Types.ObjectId, ref: 'Interest', default: null })
+    interest: Interest | Types.ObjectId;
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+export type UserDocument = HydratedDocument<User>;
+
+UserSchema.pre('save', async function (next) {  
+    if (!this.isModified('password')) return next();
+
     try {
-        if (!this.isModified('password')) return;
-        
         const salt = await bcrypt.genSalt(12);
         const hash = await bcrypt.hash(this['password'], salt);
         this['password'] = hash;
+        next();
     } catch (error) {
-        throw new Error(error);
+        next(error)
     }
+});
+
+UserSchema.pre('findOneAndUpdate', async function (next) {
+    const update = this.getUpdate();
+    
+    if (Array.isArray(update)) return next();
+
+    // Pastikan ada field password di update
+    if (update.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hash = await bcrypt.hash(update.password, salt);
+        this.setUpdate({ ...update, password: hash });
+    }
+
+    next();
 });

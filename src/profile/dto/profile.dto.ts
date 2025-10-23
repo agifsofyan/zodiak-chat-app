@@ -1,16 +1,27 @@
 import {
+    IsEnum,
     IsISO8601,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Gender } from './enum-gender.dto';
 
-export class SyncAboutDTO {
-    // Photo Profile
+export class ProfileDTO {
+    // Avatar (Profile Picture)
     @ApiProperty({
         example: 'https://s3.ap-southeast-1.amazonaws.com/cdn.laruno.com/connect/users/profiles/user-icon.png',
-        description: 'Photo Profile',
+        description: 'Avatar (Profile Picture)',
         format: 'string'
     })
     avatar: string;
+
+    // Gender
+    @ApiProperty({
+        description: 'Gender is enum (male, female)',
+        enum: Gender,
+        example: Gender.MALE,
+    })
+    @IsEnum(Gender, { message: 'Gender must be either male or female' })
+    gender: Gender;
 
     // Birthday
     @ApiProperty({

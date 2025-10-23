@@ -1,14 +1,21 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UserService } from './user.service';
 import { UserController } from './user.controller';
 import { AuthModule } from 'src/auth/auth.module';
-import { MinioService } from 'src/minio/minio.service';
 import { MinioModule } from 'src/minio/minio.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { User, UserSchema } from './schemas/user.schema';
 
 @Module({
   imports: [
+     MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+    ]),
     AuthModule,
-    MinioModule
+    // MongooseModule.forFeature([
+    //   { name: 'About', schema: AboutSchema },
+    // ]),
+    // forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
   providers: [UserService],

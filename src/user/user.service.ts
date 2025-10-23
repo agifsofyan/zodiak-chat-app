@@ -4,13 +4,10 @@ import {
     NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
-import normalize from 'normalize-url';
-import * as gravatar from 'gravatar';
-import * as mongoose from 'mongoose';
 import { AuthService } from '../auth/auth.service';
-import { IUser } from './interfaces/user/user.interface';
+import { IUser } from './interfaces/user.interface';
 import { UserRegisterDTO } from './dto/user-register.dto';
 import { UserLoginDTO } from './dto/user-login.dto';
 
@@ -21,36 +18,22 @@ export class UserService {
         private readonly authService: AuthService
     ) {}
 
-    async create(userRegisterDTO: UserRegisterDTO) {
-        let user = new this.userModel(userRegisterDTO);
-
+    async create(input: UserRegisterDTO) {
         // Check if user email is already exist
-        const isEmailExist = await this.userModel.findOne({ email: user.email });
+        const isEmailExist = await this.userModel.findOne({ email: input.email });
         if (isEmailExist) {
             throw new BadRequestException('The email you\'ve entered is already exist.');
         }
-
-        const avatar = normalize(
-            gravatar.url(user.email, {
-              s: '200',
-              r: 'pg',
-              d: 'mm'
-            }),
-            { forceHttps: true }
-        );
         
-        user.avatar = avatar;
+        let user = new this.userModel(input);
         await user.save();
 
         var users = user.toObject();
         delete users.password
-        delete users.created_at
-        delete users.updated_at
 
         return {
             user: users,
-            accessToken: await this.authService.createAccessToken(user._id),
-            // verification: verification
+            accessToken: await this.authService.createAccessToken(user._id)
         }
     }
 
@@ -70,71 +53,10 @@ export class UserService {
 
         var user = query.toObject()
         delete user.password
-        delete user.created_at
-        delete user.updated_at
 
         return {
             user,
             accessToken: await this.authService.createAccessToken(user._id)
         }
-    }
-
-    async whoAmI(userId: any) {
-        const query = await this.userModel.findOne({_id: userId});
-
-        var user = query.toObject()
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
-        delete user.__v
-        
-        return user
-    }
-
-    async checkAccount(email: string) {
-        if(!email){
-            throw new BadRequestException('The email is required')
-        }
-
-        const query = await this.userModel.findOne({'email': email})
-
-        if(!query){
-            throw new NotFoundException(`${email} based accounts were not found`)
-        }
-
-        var user = query.toObject()
-        delete user.password
-        delete user.created_at
-        delete user.updated_at
-
-        return user
-    }
-
-    async addOrChangeAbout(userId: mongoose.Types.ObjectId, input?: any): Promise<IUser> {
-        try {
-            await this.userModel.findByIdAndUpdate(userId, input);
-            
-            let profile = await this.userModel.findById(userId);
-            
-            var about = profile.toObject()
-            delete about.name
-            delete about.email
-            delete about.password
-            delete about.last_login
-            delete about.created_at
-            delete about.updated_at
-            
-            return about
-		} catch (error) {
-			throw new Error(error)	
-		}
-    }
-    
-    async updateAvatar(userId: string, avatarUrl: string) {
-        return await this.userModel.findByIdAndUpdate(
-            userId,
-            { avatar: avatarUrl },
-            { new: true },
-        );
     }
 }

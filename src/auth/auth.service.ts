@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import * as jwt from 'jsonwebtoken';
 import { Request } from 'express';
 import * as Cryptr from 'cryptr';
-import { IUser } from '../user/interfaces/user/user.interface';
+import { IUser } from '../user/interfaces/user.interface';
 import { JwtPayload } from './inrerfaces/jwt-payload/jwt-payload.interface';
 import { ConfigService } from '@nestjs/config';
 
@@ -44,7 +44,6 @@ export class AuthService {
         delete result.password
         delete result.created_at
         delete result.updated_at
-        delete result.avatar
 
         return result;
     }
