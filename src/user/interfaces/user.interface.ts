@@ -1,6 +1,5 @@
 import { Document } from 'mongoose'
-import { IAbout } from 'src/profile/interfaces/about.interface'
-import { IInterest } from 'src/profile/interfaces/interest.interface'
+import { IProfile } from 'src/profile/interfaces/profile.interface'
 
 export interface IUser extends Document {
     _id: any
@@ -8,6 +7,5 @@ export interface IUser extends Document {
     email: string
     password: string
     last_login: Date
-    About: IAbout;
-    interest: IInterest;
+    Profile: IProfile;
 }

@@ -12,10 +12,6 @@ import { User, UserSchema } from './schemas/user.schema';
       { name: User.name, schema: UserSchema },
     ]),
     AuthModule,
-    // MongooseModule.forFeature([
-    //   { name: 'About', schema: AboutSchema },
-    // ]),
-    // forwardRef(() => AuthModule),
   ],
   controllers: [UserController],
   providers: [UserService],

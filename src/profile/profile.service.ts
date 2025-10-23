@@ -1,24 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { IAbout } from './interfaces/about.interface';
 import { MinioService } from 'src/minio/minio.service';
 import { IUser } from 'src/user/interfaces/user.interface';
-import { IInterest } from './interfaces/interest.interface';
+import { IProfile } from './interfaces/profile.interface';
 
 @Injectable()
 export class ProfileService {
     constructor(
-        @InjectModel('About') private readonly aboutModel: Model<IAbout>,
-        @InjectModel('Interest') private readonly interestModel: Model<IInterest>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
+        @InjectModel('Profile') private readonly profileModel: Model<IProfile>,
         private readonly minioService: MinioService,
     ) { }
 
     async whoAmI(user: any) {
         let userQuery = await this.userModel.findById(user._id)
-            .populate('about', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
-            .populate('interest', ['_id', 'tags']);
+            .populate('profile', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight', 'interest'])
 
         let displayedUser = userQuery.toObject()
         delete displayedUser.password
@@ -26,14 +23,9 @@ export class ProfileService {
         return displayedUser
     }
 
-    async syncUser(userId: Types.ObjectId, type?: string, typeId?: any) {
-        let data = {}
-
-        if (type && typeId) data[type] = typeId
-
-        var user = await this.userModel.findByIdAndUpdate(userId, data, { new: true })
-            .populate('about', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
-            .populate('interest', ['_id', 'tags'])
+    async syncUser(userId: Types.ObjectId, profileId?: any) {
+        var user = await this.userModel.findByIdAndUpdate(userId, { profile: profileId }, { new: true })
+            .populate('profile', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight', 'interest'])
             .exec()
         
         let displayedUser = user.toObject()
@@ -42,15 +34,15 @@ export class ProfileService {
         return displayedUser
     }
     
-    async addOrChangeAbout(user: any, input: any) {
+    async addOrChangeProfile(user: any, input: any) {
         try {
-            let About = await this.aboutModel.findOneAndUpdate(
+            let profile = await this.profileModel.findOneAndUpdate(
                 { user: user._id },
                 { $set: input },
                 { upsert: true, new: true }
             );
 
-            let displayedUser = await this.syncUser(user._id, 'About', About._id)
+            let displayedUser = await this.syncUser(user._id, profile._id)
             
             return displayedUser
 		} catch (error) {
@@ -58,17 +50,18 @@ export class ProfileService {
 		}
     }
     
-    async updateAvatar(userId: Types.ObjectId, file: Express.Multer.File) {
+    async updateAvatar(user: any, file: Express.Multer.File) {
         if (!file) throw new Error('File not uploaded');
+        const userId = user._id
 
         let avatarUrl = ''
 
-        let me = await this.aboutModel.findOne({ user: userId })
-        if (me) {
+        let profile = await this.profileModel.findOne({ user: userId })
+        if (profile) {
             let oldFileName = null
             
-            if (me['avatar'] != "" && me['avatar'] != null && me['avatar'] != undefined) {
-                oldFileName = me['avatar'].split('/').pop();
+            if (profile['avatar'] != "" && profile['avatar'] != null && profile['avatar'] != undefined) {
+                oldFileName = profile['avatar'].split('/').pop();
             }
         
             try {
@@ -79,13 +72,10 @@ export class ProfileService {
         }
 
         try {
-            let About = await this.aboutModel.findOneAndUpdate(
-                { user: userId },
-                { avatar: avatarUrl },
-                { upsert: true, new: true },
-            );
+            profile.avatar = avatarUrl
+            await profile.save()
     
-            let displayedUser = await this.syncUser(userId, 'About', About._id)
+            let displayedUser = await this.syncUser(userId, profile._id)
     
             return displayedUser
         } catch (error) {
@@ -93,16 +83,30 @@ export class ProfileService {
         }
     }
 
-    async addOrChangeInterest(user: any, input: any) {
-        try {
-            let interest = await this.interestModel.findOneAndUpdate(
-                { user: user._id },
-                { $set: input },
-                { upsert: true, new: true }
-            );
+    async deleteAvatar(user: any) {
+        const userId = user._id
 
-            let displayedUser = await this.syncUser(user._id, 'interest', interest._id, )
+        let profile = await this.profileModel.findOne({ user: userId })
+        if (profile) {
+            let oldFileName = null
             
+            if (profile['avatar'] != "" && profile['avatar'] != null && profile['avatar'] != undefined) {
+                oldFileName = profile['avatar'].split('/').pop();
+            }
+        
+            try {
+                await this.minioService.deleteFile(oldFileName);
+            } catch (err) {
+                throw new Error(err.message);
+            }
+        }
+
+        try {
+            profile.avatar = null
+            await profile.save()
+
+            let displayedUser = await this.syncUser(userId, profile._id)
+    
             return displayedUser
         } catch (error) {
             throw new Error(error)

@@ -7,6 +7,7 @@ import { CONFIG_DB_CONNECTION } from 'config/db.config';
 import { CONFIG_ENV } from 'config/configuration';
 import { MinioModule } from './minio/minio.module';
 import { ProfileModule } from './profile/profile.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ProfileModule } from './profile/profile.module';
     AuthModule,
     UserModule,
     MinioModule,
-    ProfileModule
+    ProfileModule,
+    ChatModule
   ],
   controllers: [AppController],
   providers: [AppService],

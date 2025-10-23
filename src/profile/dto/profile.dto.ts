@@ -5,11 +5,11 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 import { Gender } from './enum-gender.dto';
 
-export class AboutDTO {
-    // Avatar (About Picture)
+export class ProfileDTO {
+    // Avatar (Profile Picture)
     @ApiProperty({
         example: 'https://s3.ap-southeast-1.amazonaws.com/cdn.dummy.com/connect/users/abouts/user-icon.png',
-        description: 'Avatar (About Picture)',
+        description: 'Avatar (Profile Picture)',
         format: 'string'
     })
     avatar: string;
@@ -64,4 +64,13 @@ export class AboutDTO {
         format: 'number',
     })
     weight: number;
+
+    // Interest
+    @ApiProperty({
+        example: ["Sport", "Lifestyle"],
+        description: 'Interests',
+        format: 'array of string',
+        type: [Array]
+    })
+    interest: [string];
 }

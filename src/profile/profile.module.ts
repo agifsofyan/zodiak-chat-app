@@ -1,19 +1,17 @@
 import { Module } from '@nestjs/common';
 import { UserModule } from 'src/user/user.module';
 import { MongooseModule } from '@nestjs/mongoose';
-import { About, AboutSchema } from './schemas/about.schema';
-import { Interest, InterestSchema } from './schemas/interest.schema';
 import { MinioModule } from 'src/minio/minio.module';
 import { User, UserSchema } from 'src/user/schemas/user.schema';
 import { ProfileService } from './profile.service';
 import { ProfileController } from './profile.controller';
+import { Profile, ProfileSchema } from './schemas/profile.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: About.name, schema: AboutSchema },
-      { name: Interest.name, schema: InterestSchema },
-      { name: User.name, schema: UserSchema }
+      { name: User.name, schema: UserSchema },
+      { name: Profile.name, schema: ProfileSchema },
     ]),
     UserModule,
     MinioModule,

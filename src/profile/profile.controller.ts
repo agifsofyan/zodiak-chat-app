@@ -1,12 +1,11 @@
-import { Body, Controller, Get, HttpStatus, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpStatus, Post, Res, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtGuard } from 'src/auth/guards/jwt/jwt.guard';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { User } from 'src/user/user.decorator';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { InterestDTO } from './dto/interest.dto';
 import { ProfileService } from './profile.service';
-import { AboutDTO } from './dto/about.dto';
+import { ProfileDTO } from './dto/profile.dto';
 
 @ApiTags("Profile")
 @Controller()
@@ -16,16 +15,16 @@ export class ProfileController {
     ) { }
     
     /**
-     * @route   Get api/getAbout
-     * @desc    Get user About
+     * @route   Get api/getProfile
+     * @desc    Get user profile
      * @method  Get
      * @access  Public
      */
-    @Get('getAbout')
+    @Get('getProfile')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiConsumes('application/json')
-    @ApiOperation({ summary: 'who am i (About)' })
+    @ApiOperation({ summary: 'who am i (Profile)' })
     async whoAmI(@User() user: IUser, @Res() res) {
       const result = await this.profileService.whoAmI(user);
 
@@ -38,28 +37,56 @@ export class ProfileController {
   
     /**
      * 
-     * @route   Get api/createAbout
-     * @desc    Add or Change About
+     * @route   Get api/createProfile
+     * @desc    Create Profile
+     * @param   user 
+     * @param   input 
+     * @method  Post
+     * @access  Public 
+     */
+    @Post('createProfile')
+    @UseGuards(JwtGuard)
+    @ApiBearerAuth()
+    @ApiConsumes('application/json')
+    @ApiOperation({ summary: 'Create Profile' })
+    async createProfile(
+      @User() user: IUser,
+		  @Body() input: ProfileDTO,
+		  @Res() res
+    ) {
+		  const content = await this.profileService.addOrChangeProfile(user, input);
+ 
+		  return res.status(HttpStatus.CREATED).json({
+			  statusCode: HttpStatus.CREATED,
+			  message: 'Success create profile.',
+			  data: content
+		  });
+    }
+  
+    /**
+     * 
+     * @route   Get api/updateProfile
+     * @desc    Update Profile
      * @param   user 
      * @param   input 
      * @method  Put
      * @access  Public 
      */
-    @Post('createAbout')
+    @Post('updateProfile')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiConsumes('application/json')
-    @ApiOperation({ summary: 'Add or Change About' })
-    async syncAbout(
+    @ApiOperation({ summary: 'Update Profile' })
+    async updateProfile(
       @User() user: IUser,
-		  @Body() input: AboutDTO,
+		  @Body() input: ProfileDTO,
 		  @Res() res
     ) {
-		  const content = await this.profileService.addOrChangeAbout(user, input);
+		  const content = await this.profileService.addOrChangeProfile(user, input);
  
 		  return res.status(HttpStatus.OK).json({
 			  statusCode: HttpStatus.OK,
-			  message: 'Success sync the about (About).',
+			  message: 'Success update profile.',
 			  data: content
 		  });
     }
@@ -77,7 +104,7 @@ export class ProfileController {
     @UseInterceptors(FileInterceptor('file'))
     @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({ summary: 'Add or Change Avatar (About Picture)' })
+    @ApiOperation({ summary: 'Add or Change Avatar (Profile Picture)' })
     @ApiBody({
       schema: {
         type: 'object',
@@ -96,12 +123,12 @@ export class ProfileController {
       @Res() res
     ) {
       try {
-        const About = await this.profileService.updateAvatar(user._id, file);
+        const profile = await this.profileService.updateAvatar(user, file);
 
         return res.status(HttpStatus.OK).json({
             statusCode: HttpStatus.OK,
             message: 'Upload avatar is successful',
-            data: About
+            data: profile
         });
       } catch (err) {
         throw new Error(err.message)
@@ -110,29 +137,27 @@ export class ProfileController {
   
   /**
      * 
-     * @route   Get api/interest
-     * @desc    Add or Change interests
-     * @param   input
-     * @method  Post
+     * @route   Get api/removeAvatar
+     * @desc    Remove the avatar
+     * @param   file
+     * @method  Delete
      * @access  Public 
      */
-    @Post('interest')
+    @Delete('removeAvatar')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
-    @ApiConsumes('application/json')
-    @ApiOperation({ summary: 'Add or Change Interests' })
-    async interest(
+    @ApiOperation({ summary: 'Remove Avatar (Profile Picture)' })
+    async removeAvatar(
       @User() user: IUser,
-      @Body() input: InterestDTO,
-		  @Res() res
+      @Res() res
     ) {
       try {
-        const About = await this.profileService.addOrChangeInterest(user, input);
+        const profile = await this.profileService.deleteAvatar(user);
 
         return res.status(HttpStatus.OK).json({
             statusCode: HttpStatus.OK,
-            message: 'Upload avatar is successful',
-            data: About
+            message: 'Remove avatar is successful',
+            data: profile
         });
       } catch (err) {
         throw new Error(err.message)

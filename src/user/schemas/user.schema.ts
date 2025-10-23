@@ -1,8 +1,7 @@
 import * as bcrypt from 'bcrypt';
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, HydratedDocument, Types } from 'mongoose';
-import { About } from 'src/profile/schemas/about.schema';
-import { Interest } from 'src/profile/schemas/interest.schema';
+import { Profile } from 'src/profile/schemas/profile.schema';
 
 @Schema({ timestamps: true, versionKey: false })
 export class User extends Document {
@@ -21,13 +20,11 @@ export class User extends Document {
     @Prop({ required: true, minLength: 8 })
     password: string;
     
+    @Prop({ default: Date.now })
     last_login: Date;
 
-    @Prop({ type: Types.ObjectId, ref: 'About', default: null })
-    About: About | Types.ObjectId;
-
-     @Prop({ type: Types.ObjectId, ref: 'Interest', default: null })
-    interest: Interest | Types.ObjectId;
+    @Prop({ type: Types.ObjectId, ref: 'Profile', default: null })
+    profile: Profile | Types.ObjectId;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
