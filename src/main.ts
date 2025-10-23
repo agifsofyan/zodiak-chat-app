@@ -11,7 +11,7 @@ async function bootstrap() {
 
   app.enableCors();
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  app.setGlobalPrefix('api/v1');
+  app.setGlobalPrefix('api');
   // app.useWebSocketAdapter(new WsAdapter(app) as any);
 
   // Swagger API Documentation
@@ -25,7 +25,7 @@ async function bootstrap() {
     .build();
 
   const document = SwaggerModule.createDocument(app, options);    
-  SwaggerModule.setup('api/docs/v1', app, document);
+  SwaggerModule.setup('docs', app, document);
 
   const config = app.get(ConfigService)
   const port = config.get<string>('API_PORT')

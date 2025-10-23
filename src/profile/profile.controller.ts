@@ -3,29 +3,29 @@ import { ApiBearerAuth, ApiBody, ApiConsumes, ApiOperation, ApiTags } from '@nes
 import { JwtGuard } from 'src/auth/guards/jwt/jwt.guard';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { User } from 'src/user/user.decorator';
-import { ProfileDTO } from './dto/profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ProfileService } from './profile.service';
 import { InterestDTO } from './dto/interest.dto';
+import { ProfileService } from './profile.service';
+import { AboutDTO } from './dto/about.dto';
 
 @ApiTags("Profile")
-@Controller('profile')
+@Controller()
 export class ProfileController {
     constructor(
         private profileService: ProfileService
     ) { }
     
     /**
-     * @route   Get api/v1/profile
-     * @desc    Get user profile
+     * @route   Get api/getAbout
+     * @desc    Get user About
      * @method  Get
      * @access  Public
      */
-    @Get()
+    @Get('getAbout')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiConsumes('application/json')
-    @ApiOperation({ summary: 'who am i (Profile)' })
+    @ApiOperation({ summary: 'who am i (About)' })
     async whoAmI(@User() user: IUser, @Res() res) {
       const result = await this.profileService.whoAmI(user);
 
@@ -38,46 +38,46 @@ export class ProfileController {
   
     /**
      * 
-     * @route   Get api/v1/profile/about
+     * @route   Get api/createAbout
      * @desc    Add or Change About
      * @param   user 
      * @param   input 
      * @method  Put
      * @access  Public 
      */
-    @Post('about')
+    @Post('createAbout')
     @UseGuards(JwtGuard)
     @ApiBearerAuth()
     @ApiConsumes('application/json')
     @ApiOperation({ summary: 'Add or Change About' })
     async syncAbout(
       @User() user: IUser,
-		  @Body() input: ProfileDTO,
+		  @Body() input: AboutDTO,
 		  @Res() res
     ) {
 		  const content = await this.profileService.addOrChangeAbout(user, input);
  
 		  return res.status(HttpStatus.OK).json({
 			  statusCode: HttpStatus.OK,
-			  message: 'Success sync the about (profile).',
+			  message: 'Success sync the about (About).',
 			  data: content
 		  });
     }
     
     /**
      * 
-     * @route   Get api/v1/profile/avatar
+     * @route   Get api/uploadAvatar
      * @desc    Add/Change the avatar
      * @param   file
      * @method  Post
      * @access  Public 
      */
-    @Post('avatar')
+    @Post('uploadAvatar')
     @UseGuards(JwtGuard)
     @UseInterceptors(FileInterceptor('file'))
     @ApiBearerAuth()
     @ApiConsumes('multipart/form-data')
-    @ApiOperation({ summary: 'Add or Change Avatar (Profile Picture)' })
+    @ApiOperation({ summary: 'Add or Change Avatar (About Picture)' })
     @ApiBody({
       schema: {
         type: 'object',
@@ -96,12 +96,12 @@ export class ProfileController {
       @Res() res
     ) {
       try {
-        const profile = await this.profileService.updateAvatar(user._id, file);
+        const About = await this.profileService.updateAvatar(user._id, file);
 
         return res.status(HttpStatus.OK).json({
             statusCode: HttpStatus.OK,
             message: 'Upload avatar is successful',
-            data: profile
+            data: About
         });
       } catch (err) {
         throw new Error(err.message)
@@ -110,7 +110,7 @@ export class ProfileController {
   
   /**
      * 
-     * @route   Get api/v1/profile/interest
+     * @route   Get api/interest
      * @desc    Add or Change interests
      * @param   input
      * @method  Post
@@ -127,12 +127,12 @@ export class ProfileController {
 		  @Res() res
     ) {
       try {
-        const profile = await this.profileService.addOrChangeInterest(user, input);
+        const About = await this.profileService.addOrChangeInterest(user, input);
 
         return res.status(HttpStatus.OK).json({
             statusCode: HttpStatus.OK,
             message: 'Upload avatar is successful',
-            data: profile
+            data: About
         });
       } catch (err) {
         throw new Error(err.message)

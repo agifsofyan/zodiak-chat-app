@@ -23,7 +23,7 @@ export class UserController {
     ) { }
 
     /**
-     * @route   POST api/v1/register
+     * @route   POST api/register
      * @desc    Create a new user
      * @method  Post
      * @access  Public
@@ -42,7 +42,7 @@ export class UserController {
     }
 
     /**
-     * @route   POST api/v1/login
+     * @route   POST api/login
      * @desc    Authenticate user
      * @method  Post
      * @access  Public

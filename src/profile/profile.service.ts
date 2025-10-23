@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { IProfile } from './interfaces/profile.interface';
+import { IAbout } from './interfaces/about.interface';
 import { MinioService } from 'src/minio/minio.service';
 import { IUser } from 'src/user/interfaces/user.interface';
 import { IInterest } from './interfaces/interest.interface';
@@ -9,7 +9,7 @@ import { IInterest } from './interfaces/interest.interface';
 @Injectable()
 export class ProfileService {
     constructor(
-        @InjectModel('Profile') private readonly profileModel: Model<IProfile>,
+        @InjectModel('About') private readonly aboutModel: Model<IAbout>,
         @InjectModel('Interest') private readonly interestModel: Model<IInterest>,
         @InjectModel('User') private readonly userModel: Model<IUser>,
         private readonly minioService: MinioService,
@@ -17,7 +17,7 @@ export class ProfileService {
 
     async whoAmI(user: any) {
         let userQuery = await this.userModel.findById(user._id)
-            .populate('profile', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
+            .populate('about', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
             .populate('interest', ['_id', 'tags']);
 
         let displayedUser = userQuery.toObject()
@@ -32,7 +32,7 @@ export class ProfileService {
         if (type && typeId) data[type] = typeId
 
         var user = await this.userModel.findByIdAndUpdate(userId, data, { new: true })
-            .populate('profile', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
+            .populate('about', ['_id', 'avatar', 'gender', 'birthday', 'horoscope', 'zodiac', 'height', 'weight'])
             .populate('interest', ['_id', 'tags'])
             .exec()
         
@@ -44,13 +44,13 @@ export class ProfileService {
     
     async addOrChangeAbout(user: any, input: any) {
         try {
-            let profile = await this.profileModel.findOneAndUpdate(
+            let About = await this.aboutModel.findOneAndUpdate(
                 { user: user._id },
                 { $set: input },
                 { upsert: true, new: true }
             );
 
-            let displayedUser = await this.syncUser(user._id, 'profile', profile._id)
+            let displayedUser = await this.syncUser(user._id, 'About', About._id)
             
             return displayedUser
 		} catch (error) {
@@ -63,7 +63,7 @@ export class ProfileService {
 
         let avatarUrl = ''
 
-        let me = await this.profileModel.findOne({ user: userId })
+        let me = await this.aboutModel.findOne({ user: userId })
         if (me) {
             let oldFileName = null
             
@@ -79,13 +79,13 @@ export class ProfileService {
         }
 
         try {
-            let profile = await this.profileModel.findOneAndUpdate(
+            let About = await this.aboutModel.findOneAndUpdate(
                 { user: userId },
                 { avatar: avatarUrl },
                 { upsert: true, new: true },
             );
     
-            let displayedUser = await this.syncUser(userId, 'profile', profile._id)
+            let displayedUser = await this.syncUser(userId, 'About', About._id)
     
             return displayedUser
         } catch (error) {
