@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as jwt from 'jsonwebtoken';
@@ -31,19 +31,17 @@ export class AuthService {
     }
 
     async validate(jwtPayload: JwtPayload) {
-        var user
-        user = await this.userModel.findOne({ _id: jwtPayload.sub });
-        user.last_login = new Date()
-        await user.save()
-
+        let user = await this.userModel.findOne({ _id: jwtPayload.sub });
+        
         if (!user) {
             throw new UnauthorizedException('auth.service');
         }
 
+        user.last_login = new Date()
+        await user.save()
+
         var result = user.toObject()
         delete result.password
-        delete result.created_at
-        delete result.updated_at
 
         return result;
     }

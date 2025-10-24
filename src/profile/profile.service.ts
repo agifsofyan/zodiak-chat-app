@@ -58,14 +58,8 @@ export class ProfileService {
 
         let profile = await this.profileModel.findOne({ user: userId })
         if (profile) {
-            let oldFileName = null
-            
-            if (profile['avatar'] != "" && profile['avatar'] != null && profile['avatar'] != undefined) {
-                oldFileName = profile['avatar'].split('/').pop();
-            }
-        
             try {
-                avatarUrl = await this.minioService.uploadAndOverwriteExistingFile(file, oldFileName);
+                avatarUrl = await this.minioService.uploadAndOverwriteFile(file, profile.avatar, 'avatar');
             } catch (err) {
                 throw new Error(err.message);
             }
@@ -88,14 +82,8 @@ export class ProfileService {
 
         let profile = await this.profileModel.findOne({ user: userId })
         if (profile) {
-            let oldFileName = null
-            
-            if (profile['avatar'] != "" && profile['avatar'] != null && profile['avatar'] != undefined) {
-                oldFileName = profile['avatar'].split('/').pop();
-            }
-        
             try {
-                await this.minioService.deleteFile(oldFileName);
+                await this.minioService.deleteFile(profile.avatar);
             } catch (err) {
                 throw new Error(err.message);
             }

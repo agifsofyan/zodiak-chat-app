@@ -2,8 +2,8 @@ import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Document, HydratedDocument, Types } from "mongoose";
 import { User } from "src/user/schemas/user.schema";
 import { Gender } from "../dto/enum-gender.dto";
-import { getHoroscopeFromDate } from "util/horoscope.util";
-import { getChineseZodiacFromDate } from "util/zodiac.util";
+import { getHoroscopeFromDate } from "../../../util/horoscope.util";
+import { getChineseZodiacFromDate } from "../../../util/zodiac.util";
 
 @Schema({ timestamps: true, versionKey: false })
 export class Profile extends Document {
