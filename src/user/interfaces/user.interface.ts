@@ -8,4 +8,6 @@ export interface IUser extends Document {
     password: string
     last_login: Date
     Profile: IProfile;
+    createdAt: Date
+    updatedAt: Date
 }

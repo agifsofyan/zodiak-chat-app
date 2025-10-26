@@ -30,6 +30,8 @@ export class UserService {
 
         var users = user.toObject();
         delete users.password
+        delete user.createdAt
+        delete user.updatedAt
 
         return {
             user: users,
@@ -53,6 +55,8 @@ export class UserService {
 
         var user = query.toObject()
         delete user.password
+        delete user.createdAt
+        delete user.updatedAt
 
         return {
             user,
