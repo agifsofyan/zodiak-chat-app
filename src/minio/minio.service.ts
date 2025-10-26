@@ -14,9 +14,10 @@ export class MinioService implements OnModuleInit {
         this.minioClient = new Minio.Client({
             endPoint: this.configService.get<string>('MINIO_ENDPOINT'),
             port: Number(this.configService.get<number>('MINIO_PORT')),
-            useSSL: Boolean(this.configService.get<boolean>('MINIO_USE_SSL')),
+            useSSL: this.configService.get<boolean>('MINIO_USE_SSL'),
             accessKey: this.configService.get<string>('MINIO_ACCESS_KEY'),
             secretKey: this.configService.get<string>('MINIO_SECRET_KEY'),
+            region: this.configService.get<string>('MINIO_REGION') || 'us-east-1',
         });
 
         this.bucketName = this.configService.get<string>('MINIO_BUCKET_NAME');
@@ -24,7 +25,7 @@ export class MinioService implements OnModuleInit {
         try {
             const exists = await this.minioClient.bucketExists(this.bucketName);
             if (!exists) {
-                await this.minioClient.makeBucket(this.bucketName, this.configService.get<string>('MINIO_REGION'));
+                await this.minioClient.makeBucket(this.bucketName, this.minioClient.region);
                 console.log(`Bucket "${this.bucketName}" created`);
             }
         } catch (err) {
@@ -61,7 +62,6 @@ export class MinioService implements OnModuleInit {
             if (!isEmpty(fileUrl)) {
                 const objectName = getFileName(fileUrl);
                 await this.minioClient.removeObject(this.bucketName, objectName);
-
             }
         } catch (err) {
             console.warn("Can't delete old avatar:", err.message);
