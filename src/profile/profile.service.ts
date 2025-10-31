@@ -46,12 +46,11 @@ export class ProfileService {
             
             return displayedUser
 		} catch (error) {
-			throw new Error(error)
+			throw new Error(error.message)
 		}
     }
     
     async updateAvatar(user: any, file: Express.Multer.File) {
-        if (!file) throw new Error('File not uploaded');
         const userId = user._id
 
         let avatarUrl = ''
@@ -73,7 +72,7 @@ export class ProfileService {
     
             return displayedUser
         } catch (error) {
-            throw new Error(error)
+            throw new Error(error.message)
         }
     }
 
@@ -97,7 +96,7 @@ export class ProfileService {
     
             return displayedUser
         } catch (error) {
-            throw new Error(error)
+            throw new Error(error.message)
         }
     }
 }
