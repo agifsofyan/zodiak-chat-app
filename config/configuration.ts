@@ -2,27 +2,31 @@ import { ConfigModule } from '@nestjs/config';
 import * as Joi from 'joi';
 
 export const CONFIG_ENV = ConfigModule.forRoot({
-	isGlobal: true,
-	envFilePath: '.env',
-	validationSchema: Joi.object({
-		API_PORT: Joi.number().default(3000),
+  isGlobal: true,
+  envFilePath: '.env',
+  validationSchema: Joi.object({
+    API_PORT: Joi.number().default(3000),
 
-		DB_USER: Joi.string().allow('').optional(),
-		DB_PASS: Joi.string().allow('').optional(),
-		DB_HOST: Joi.string().required(),
-		DB_PORT: Joi.number().default(27017),
-		DB_NAME: Joi.string().required(),
-		DB_AUTH: Joi.string().allow('').optional(),
+    DB_USER: Joi.string().allow('').optional(),
+    DB_PASS: Joi.string().allow('').optional(),
+    DB_HOST: Joi.string().required(),
+    DB_PORT: Joi.number().default(27017),
+    DB_NAME: Joi.string().required(),
+    DB_AUTH: Joi.string().allow('').optional(),
 
-		JWT_SECRET_KEY: Joi.string().required(),
-		JWT_EXPIRATION: Joi.string().default('1d'),
-		JWT_ENCRYPT_SECRET_KEY: Joi.string().required(),
+    JWT_SECRET_KEY: Joi.string().required(),
+    JWT_EXPIRATION: Joi.string().default('1d'),
+    JWT_ENCRYPT_SECRET_KEY: Joi.string().required(),
 
-		MINIO_ENDPOINT: Joi.string().allow('').optional(),
-		MINIO_PORT: Joi.number().allow('').optional(),
-      	MINIO_USE_SSL: Joi.boolean().default(true),
-      	MINIO_ACCESS_KEY: Joi.string().allow('').optional(),
-		MINIO_SECRET_KEY: Joi.string().allow('').optional(),
-		MINIO_REGION: Joi.string().default('ap-southeast-1'),
-	}),
-})
+    MINIO_ENDPOINT: Joi.string().allow('').optional(),
+    MINIO_PORT: Joi.number().allow('').optional(),
+    MINIO_USE_SSL: Joi.boolean().default(true),
+    MINIO_ACCESS_KEY: Joi.string().allow('').optional(),
+    MINIO_SECRET_KEY: Joi.string().allow('').optional(),
+    MINIO_REGION: Joi.string().default('ap-southeast-1'),
+
+    KAFKA_BROKERS: Joi.string().default('localhost:9092'),
+    KAFKA_CLIENT_ID: Joi.string().default('zodiak-chat-app'),
+    KAFKA_GROUP_ID: Joi.string().default('chat-consumer-group'),
+  }),
+});

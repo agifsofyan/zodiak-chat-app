@@ -1,0 +1,98 @@
+version: '3.8'
+
+services:
+  kafka1:
+    image: apache/kafka:3.7.0
+    container_name: kafka1
+    ports:
+      - '9091:9091'
+      - '19091:19091'
+    hostname: kafka1
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:4041,2@kafka2:4042,3@kafka3:4043
+      KAFKA_LISTENERS: INTERNAL://:9091,EXTERNAL://:19091,CONTROLLER://:4041
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka1:9091,EXTERNAL://localhost:19091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    volumes:
+      - kafka1-data:/var/lib/kafka/data
+    networks:
+      - zodiak-network
+
+  kafka2:
+    image: apache/kafka:3.7.0
+    container_name: kafka2
+    ports:
+      - '9092:9092'
+      - '19092:19092'
+    hostname: kafka2
+    environment:
+      KAFKA_NODE_ID: 2
+      KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:4041,2@kafka2:4042,3@kafka3:4043
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:19092,CONTROLLER://:4042
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka2:9092,EXTERNAL://localhost:19092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    volumes:
+      - kafka2-data:/var/lib/kafka/data
+    networks:
+      - zodiak-network
+
+  kafka3:
+    image: apache/kafka:3.7.0
+    container_name: kafka3
+    ports:
+      - '9093:9093'
+      - '19093:19093'
+    hostname: kafka3
+    environment:
+      KAFKA_NODE_ID: 3
+      KAFKA_CLUSTER_ID: 5L6g3nShT-eMCtK--X86sw
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka1:4041,2@kafka2:4042,3@kafka3:4043
+      KAFKA_LISTENERS: INTERNAL://:9093,EXTERNAL://:19093,CONTROLLER://:4043
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka3:9093,EXTERNAL://localhost:19093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 3
+    volumes:
+      - kafka3-data:/var/lib/kafka/data
+    networks:
+      - zodiak-network
+
+  kafka-ui:
+    image: ghcr.io/kafbat/kafka-ui:v1.4.2
+    container_name: kafka-ui
+    ports:
+      - '8080:8080'
+
+    environment:
+      # Use a specific profile if required by your version, e.g., "keycloak,rbac"
+      SPRING_PROFILES_ACTIVE: oauth
+
+      # ===== Kafka =====
+      KAFKA_CLUSTERS_0_NAME: local-kraft
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka1:9091,kafka2:9092,kafka3:9093
+
+    networks:
+      - zodiak-network
+
+volumes:
+  kafka1-data:
+  kafka2-data:
+  kafka3-data:
+
+networks:
+  zodiak-network:
+    driver: bridge
+    external: true
