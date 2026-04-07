@@ -138,10 +138,15 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
   async handleMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody()
-    data: { conversationId: string; content: string; type?: MessageType },
+    data: {
+      conversationId: string;
+      content: string;
+      type?: MessageType;
+      replyTo?: string;
+    },
   ) {
     const userId = (client as any).userId;
-    const { conversationId, content, type = MessageType.TEXT } = data;
+    const { conversationId, content, type = MessageType.TEXT, replyTo } = data;
 
     try {
       const message = await this.chatService.createMessage(
@@ -149,6 +154,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         userId,
         content,
         type,
+        replyTo,
       );
 
       const messageData = {
@@ -161,6 +167,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         },
         content,
         type,
+        replyTo: (message as any).replyTo
+          ? {
+              _id: (message as any).replyTo._id,
+              content: (message as any).replyTo?.content,
+              sender: (message as any).replyTo?.sender,
+              createdAt: (message as any).replyTo?.createdAt,
+            }
+          : null,
         isRead: false,
         createdAt: (message as any).createdAt,
       };

@@ -35,6 +35,9 @@ export class ChatMessage extends Document {
 
   @Prop({ type: Types.ObjectId, ref: 'User', default: null })
   deletedBy?: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Message', default: null })
+  replyTo?: Types.ObjectId;
 }
 
 export const ChatMessageSchema = SchemaFactory.createForClass(ChatMessage);

@@ -132,6 +132,7 @@ export class ChatController {
       user._id,
       createMessageDto.content,
       createMessageDto.type || 'text',
+      createMessageDto.replyTo,
     );
 
     return res.status(HttpStatus.CREATED).json({

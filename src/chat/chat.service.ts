@@ -90,6 +90,7 @@ export class ChatService {
     return this.messageModel
       .find({ conversation: conversationObjectId, isDeleted: false })
       .populate('sender', 'name email profile')
+      .populate('replyTo', 'content sender createdAt type')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
@@ -133,55 +134,11 @@ export class ChatService {
     return this.messageModel
       .find({ conversation: conversationObjectId, isDeleted: false })
       .populate('sender', 'name email profile')
+      .populate('replyTo', 'content sender createdAt type')
       .sort({ createdAt: -1 })
       .skip((page - 1) * limit)
       .limit(limit)
       .exec();
-  }
-
-  async createMessage(
-    conversationId: string,
-    senderId: string,
-    content: string,
-    type: string = 'text',
-  ): Promise<ChatMessage> {
-    const conversationObjectId = new Types.ObjectId(conversationId);
-    const senderObjectId = new Types.ObjectId(senderId);
-
-    const conversation =
-      await this.conversationModel.findById(conversationObjectId);
-    if (!conversation) {
-      throw new NotFoundException('Conversation not found');
-    }
-
-    const message = await this.messageModel.create({
-      conversation: conversationObjectId,
-      sender: senderObjectId,
-      content,
-      type,
-      isRead: false,
-    });
-
-    await this.conversationModel.findByIdAndUpdate(conversationObjectId, {
-      lastMessage: message._id,
-      updatedAt: new Date(),
-    });
-
-    try {
-      await this.kafkaProducer.emit(KAFKA_TOPICS.CHAT_MESSAGE, {
-        conversationId,
-        messageId: message._id.toString(),
-        senderId,
-        content,
-        type,
-        timestamp:
-          (message as any).createdAt?.toISOString() || new Date().toISOString(),
-      });
-    } catch (error) {
-      this.logger.warn('Failed to emit Kafka message:', error);
-    }
-
-    return message.populate('sender', 'name email profile');
   }
 
   async markAsRead(
@@ -299,6 +256,62 @@ export class ChatService {
     }
 
     return { modifiedCount: result.modifiedCount };
+  }
+
+  async createMessage(
+    conversationId: string,
+    senderId: string,
+    content: string,
+    type: string = 'text',
+    replyTo?: string,
+  ): Promise<ChatMessage> {
+    const conversationObjectId = new Types.ObjectId(conversationId);
+    const senderObjectId = new Types.ObjectId(senderId);
+
+    const conversation =
+      await this.conversationModel.findById(conversationObjectId);
+    if (!conversation) {
+      throw new NotFoundException('Conversation not found');
+    }
+
+    const messageData: any = {
+      conversation: conversationObjectId,
+      sender: senderObjectId,
+      content,
+      type,
+      isRead: false,
+    };
+
+    if (replyTo) {
+      messageData.replyTo = new Types.ObjectId(replyTo);
+    }
+
+    const message = await this.messageModel.create(messageData);
+
+    await this.conversationModel.findByIdAndUpdate(conversationObjectId, {
+      lastMessage: message._id,
+      updatedAt: new Date(),
+    });
+
+    try {
+      await this.kafkaProducer.emit(KAFKA_TOPICS.CHAT_MESSAGE, {
+        conversationId,
+        messageId: message._id.toString(),
+        senderId,
+        content,
+        type,
+        replyTo,
+        timestamp:
+          (message as any).createdAt?.toISOString() || new Date().toISOString(),
+      });
+    } catch (error) {
+      this.logger.warn('Failed to emit Kafka message:', error);
+    }
+
+    const populatedMessage = await (message as any)
+      .populate('sender', 'name email profile')
+      .populate('replyTo', 'content sender createdAt type');
+    return populatedMessage;
   }
 
   async createGroup(

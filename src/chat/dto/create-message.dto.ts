@@ -28,4 +28,9 @@ export class CreateMessageDto {
   @IsEnum(MessageType)
   @IsOptional()
   type?: MessageType = MessageType.TEXT;
+
+  @ApiPropertyOptional({ description: 'Message ID being replied to' })
+  @IsMongoId()
+  @IsOptional()
+  replyTo?: string;
 }
